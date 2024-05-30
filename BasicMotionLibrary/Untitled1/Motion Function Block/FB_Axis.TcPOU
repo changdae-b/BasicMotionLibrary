@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.6">
+  <POU Name="FB_Axis" Id="{8bb31711-6e3a-4686-9e97-69d5256f8014}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'reflection'}
+FUNCTION_BLOCK FB_Axis
+VAR_INPUT
+	stAxisParameter : ST_AxisParameter;
+END_VAR
+VAR_OUTPUT
+	Error : BOOL;
+	ErrorID : UDINT;
+	Busy : BOOL;
+END_VAR
+VAR
+	{attribute 'instance-path'}
+	{attribute 'noinit'}
+	MyPath : STRING;
+	
+	_Initalized : BOOL;
+	axis : AXIS_REF;
+	RingBuffer_MCMoveAbsolute : FB_RingBuffer_MCMoveAbsolute;
+	MCMoveAbsolute : POINTER TO MC_MoveAbsolute;
+	MCPower : MC_Power;
+	MCHalt: MC_Halt;
+	MCReset : MC_Reset;
+	AxisAlarm : ARRAY[1..CONSTANTS.BASIC_AXIS_ALARM_COUNT] OF FB_TcMessage;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Command" Id="{7564f48d-e337-41b3-9d48-db42ea1aa42d}" />
+    <Method Name="CyclicLogic" Id="{6151dd26-1977-4db3-ba96-7c76722d3616}">
+      <Declaration><![CDATA[METHOD CyclicLogic
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+IF NOT _Initalized THEN
+	Initalize();
+	_Initalized := TRUE;
+	RETURN;
+END_IF
+
+(* MC_Power *)
+MCPower(Axis := Axis);
+IF MCPower.Error THEN
+	Error	 := TRUE;
+	ErrorID := MCPower.ErrorID;
+END_IF
+
+(* MC_MoveHalt *)
+MCHalt(Axis := Axis);
+IF NOT MCHalt.Busy THEN
+	IF MCHalt.Error THEN
+		Error	 := TRUE;
+		ErrorID := MCHalt.ErrorID;
+	ELSE
+		MCHalt(Axis := Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+(* MC_MoveAbsolute *)
+RingBuffer_MCMoveAbsolute(Axis := Axis);
+IF (MCMoveAbsolute <> 0) AND_THEN NOT MCMoveAbsolute^.Busy THEN
+	IF MCMoveAbsolute^.Error THEN
+		Error	 := TRUE;
+		ErrorID := MCMoveAbsolute^.ErrorID;
+	ELSE
+		MCMoveAbsolute^(Axis := Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+(* FB_Reset *)
+MCReset(Axis := axis); 
+IF NOT MCReset.Busy THEN
+	IF MCReset.Error THEN
+		Error				:= TRUE;
+		ErrorID			   	:= MCReset.ErrorID;
+	END_IF
+	
+	MCReset(Axis := Axis, Execute := FALSE);
+END_IF
+
+
+Busy := ((MCMoveAbsolute <> 0) AND_THEN MCMoveAbsolute^.Busy) OR MCHalt.Busy OR MCReset.Busy;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Disable" Id="{3095fd83-673f-4ac6-bd20-c0fbfaf6e98f}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD Disable : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MCPower(Axis := axis, Enable := FALSE, Enable_Positive := FALSE, Enable_Negative := FALSE);
+Disable := TRUE;
+AxisAlarm[E_AxisEvent.Disable].Send(0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Enable" Id="{4b0cb9d1-b095-4c39-b566-b00d8cc32790}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD Enable : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MCPower(Axis := axis, Enable := TRUE, Enable_Positive := TRUE, Enable_Negative := TRUE);
+Enable := TRUE;
+
+AxisAlarm[E_AxisEvent.Enable].Send(0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Halt" Id="{8abb493e-29a5-4b5a-9b43-18a51c936525}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD Halt : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Error AND Axis.Status.Error THEN
+	(* It's possible that a function block errored but
+	not the NC itself--in this case we can allow a stop command.
+	If the NC axis has a real fault then we want a successful reset first *)
+	RETURN;
+END_IF
+
+MCHalt(Axis			:= Axis,
+	   Execute		:= TRUE,
+	   Deceleration := stAxisParameter.Deceleration,
+	   Jerk			:= stAxisParameter.Jerk);
+Halt := TRUE;
+
+AxisAlarm[E_AxisEvent.Halt].Send(0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Initalize" Id="{01c2725b-bd88-4bcc-8722-06ab258f2c9d}">
+      <Declaration><![CDATA[METHOD PROTECTED Initalize]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AxisAlarm[E_AxisEvent.Disable].CreateEx(stEventEntry := TC_Events.AxisEvent.Disable, 0);
+AxisAlarm[E_AxisEvent.Enable].CreateEx(stEventEntry := TC_Events.AxisEvent.Enable, 0);
+AxisAlarm[E_AxisEvent.Halt].CreateEx(stEventEntry := TC_Events.AxisEvent.Halt, 0);
+AxisAlarm[E_AxisEvent.Reset].CreateEx(stEventEntry := TC_Events.AxisEvent.Reset, 0);
+AxisAlarm[E_AxisEvent.MoveAbsolute].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveAbsolute, 0);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="InPosition" Id="{bb1fcd93-1c13-4877-81cd-be535d620a08}">
+      <Declaration><![CDATA[PROPERTY InPosition : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{54254863-93f9-493e-b78a-8ea71cf58de3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[InPosition := Axis.Status.InTargetPosition;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="MoveAbsolute" Id="{e0b7fc15-0058-4245-8ed3-e7a88789df47}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD MoveAbsolute
+VAR_INPUT
+	Position : LREAL;
+	AbortPrevious : BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Error THEN
+	RETURN;
+ELSE
+	IF (Busy AND NOT AbortPrevious) THEN
+		RETURN;
+	END_IF
+END_IF
+
+MCMoveAbsolute := RingBuffer_MCMoveAbsolute.GetNewFB();
+MCMoveAbsolute^(Axis		 := Axis,
+				Execute		 := TRUE,
+				Position	 := Position,
+				Velocity	 := stAxisParameter.Velocity,
+				Acceleration := stAxisParameter.Acceleration,
+				Deceleration := stAxisParameter.Deceleration,
+				Jerk		 := stAxisParameter.Jerk);
+				
+AxisAlarm[E_AxisEvent.MoveAbsolute].Send(0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{86d17185-5653-45be-9d73-69b0cf831727}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD Reset : BOOL;
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MCReset(Axis := Axis, Execute := TRUE);
+Busy	 := TRUE;
+Error := FALSE;
+ErrorID := 0;
+Reset := TRUE;
+
+IF MCMoveAbsolute <> 0 THEN
+	IF MCMoveAbsolute^.Error THEN
+		MCMoveAbsolute^(Axis := Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+
+IF MCHalt.Error THEN
+	MCHalt(Axis := Axis, Execute := FALSE);
+END_IF
+
+AxisAlarm[E_AxisEvent.Reset].Send(0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UpdateAxisStatus" Id="{e8a3dd73-9d2a-41b5-b104-842058e2119c}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD UpdateAxisStatus]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Axis.ReadStatus(); //Axis 상태 업데이트]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

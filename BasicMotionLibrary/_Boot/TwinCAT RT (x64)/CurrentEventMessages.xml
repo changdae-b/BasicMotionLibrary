@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<TcEventSources Version="2">
+	<Translations>
+		<Text TxtId="Axis Disable Command"/>
+		<Text TxtId="Axis Enable Command"/>
+		<Text TxtId="Halt Command"/>
+		<Text TxtId="MoveAbsolute Command"/>
+		<Text TxtId="NewEventClass_DisplayText"/>
+		<Text TxtId="Reset Command"/>
+		<Text TxtId="This is for only Init"/>
+	</Translations>
+	<Source>
+		<GUID>{5309BB91-A2F1-48EB-9C33-47CECE4B7161}</GUID>
+		<Name>NewEventClass_DisplayText</Name>
+		<Event>
+			<Id>1</Id>
+			<Message>This is for only Init</Message>
+		</Event>
+		<Event>
+			<Id>2</Id>
+			<Message>Axis Enable Command</Message>
+		</Event>
+		<Event>
+			<Id>3</Id>
+			<Message>Axis Disable Command</Message>
+		</Event>
+		<Event>
+			<Id>4</Id>
+			<Message>Halt Command</Message>
+		</Event>
+		<Event>
+			<Id>5</Id>
+			<Message>MoveAbsolute Command</Message>
+		</Event>
+		<Event>
+			<Id>6</Id>
+			<Message>Reset Command</Message>
+		</Event>
+	</Source>
+</TcEventSources>
