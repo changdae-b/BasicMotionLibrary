@@ -14,12 +14,19 @@ END_VAR
 VAR
 	{attribute 'instance-path'}
 	{attribute 'noinit'}
-	MyPath : STRING;
+	_MyPath : STRING;
 	
 	_Initalized : BOOL;
-	axis : AXIS_REF;
+	_axis : AXIS_REF;
+	MCJog							  : MC_Jog;
 	RingBuffer_MCMoveAbsolute : FB_RingBuffer_MCMoveAbsolute;
-	MCMoveAbsolute : POINTER TO MC_MoveAbsolute;
+	RingBuffer_MCMoveRelative : FB_RingBuffer_MCMoveRelative;
+	RingBuffer_MCMoveVelocity : FB_RingBuffer_MCMoveVelocity;
+	RingBuffer_MCMoveModulo	  : FB_RingBuffer_MCMoveModulo;
+	MCMoveAbsolute			  : POINTER TO MC_MoveAbsolute;
+	MCMoveRelative			  : POINTER TO MC_MoveRelative;
+	MCMoveVelocity			  : POINTER TO MC_MoveVelocity;
+	MCMoveModulo			  : POINTER TO MC_MoveModulo;
 	MCPower : MC_Power;
 	MCHalt: MC_Halt;
 	MCReset : MC_Reset;
@@ -29,62 +36,116 @@ END_VAR]]></Declaration>
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Folder Name="Command" Id="{7564f48d-e337-41b3-9d48-db42ea1aa42d}" />
+    <Property Name="Axis" Id="{c6057e10-279a-458b-8636-571e39194e34}">
+      <Declaration><![CDATA[PROPERTY Axis : REFERENCE TO AXIS_REF]]></Declaration>
+      <Get Name="Get" Id="{11350c15-b435-47b4-87c5-7163c6675096}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Axis REF= _Axis;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="CyclicLogic" Id="{6151dd26-1977-4db3-ba96-7c76722d3616}">
       <Declaration><![CDATA[METHOD CyclicLogic
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-
-IF NOT _Initalized THEN
+        <ST><![CDATA[IF NOT _Initalized THEN
 	Initalize();
 	_Initalized := TRUE;
 	RETURN;
 END_IF
 
 (* MC_Power *)
-MCPower(Axis := Axis);
+MCPower(Axis := _Axis);
 IF MCPower.Error THEN
 	Error	 := TRUE;
 	ErrorID := MCPower.ErrorID;
 END_IF
 
-(* MC_MoveHalt *)
-MCHalt(Axis := Axis);
+(* MC_Halt *)
+MCHalt(Axis := _Axis);
 IF NOT MCHalt.Busy THEN
 	IF MCHalt.Error THEN
 		Error	 := TRUE;
 		ErrorID := MCHalt.ErrorID;
 	ELSE
-		MCHalt(Axis := Axis, Execute := FALSE);
+		MCHalt(Axis := _Axis, Execute := FALSE);
 	END_IF
 END_IF
 
 (* MC_MoveAbsolute *)
-RingBuffer_MCMoveAbsolute(Axis := Axis);
+RingBuffer_MCMoveAbsolute(Axis := _Axis);
 IF (MCMoveAbsolute <> 0) AND_THEN NOT MCMoveAbsolute^.Busy THEN
 	IF MCMoveAbsolute^.Error THEN
 		Error	 := TRUE;
 		ErrorID := MCMoveAbsolute^.ErrorID;
 	ELSE
-		MCMoveAbsolute^(Axis := Axis, Execute := FALSE);
+		MCMoveAbsolute^(Axis := _Axis, Execute := FALSE);
 	END_IF
 END_IF
 
+
+(* MC_MoveRelative *)
+RingBuffer_MCMoveRelative(Axis := _Axis);
+IF (MCMoveRelative <> 0) AND_THEN NOT MCMoveRelative^.Busy THEN
+	IF MCMoveRelative^.Error THEN
+		Error	 := TRUE;
+		ErrorID := MCMoveRelative^.ErrorID;
+	ELSE
+		MCMoveRelative^(Axis := _Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+(* MC_MoveVelocity *)
+RingBuffer_MCMoveVelocity(Axis := _Axis);
+IF (MCMoveVelocity <> 0) AND_THEN ((NOT MCMoveVelocity^.Busy) OR MCMoveVelocity^.InVelocity) THEN
+	IF MCMoveVelocity^.Error THEN
+		Error	 := TRUE;
+		ErrorID := MCMoveVelocity^.ErrorID;
+	ELSE
+		MCMoveVelocity^(Axis := _Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+(* MC_MoveModulo *)
+RingBuffer_MCMoveModulo(Axis := _Axis);
+IF (MCMoveModulo <> 0) AND_THEN NOT MCMoveModulo^.Busy THEN
+	IF MCMoveModulo^.Error THEN
+		Error	 := TRUE;
+		ErrorID := MCMoveModulo^.ErrorID;
+	ELSE
+		MCMoveModulo^(Axis := _Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+
+(*MC_Jog*)
+MCJog(Axis := _Axis);
+IF MCJog.Error THEN
+	Error	 := TRUE;
+	ErrorID := MCJog.ErrorID;
+END_IF
+
 (* FB_Reset *)
-MCReset(Axis := axis); 
+MCReset(Axis := _axis); 
 IF NOT MCReset.Busy THEN
 	IF MCReset.Error THEN
 		Error				:= TRUE;
 		ErrorID			   	:= MCReset.ErrorID;
 	END_IF
 	
-	MCReset(Axis := Axis, Execute := FALSE);
+	MCReset(Axis := _Axis, Execute := FALSE);
 END_IF
 
+Busy := ((MCMoveAbsolute <> 0) AND_THEN MCMoveAbsolute^.Busy) OR ((MCMoveRelative <> 0) AND_THEN MCMoveRelative^.Busy) OR ((MCMoveVelocity <> 0) AND_THEN MCMoveVelocity^.Busy) OR ((MCMoveModulo <> 0) AND_THEN MCMoveModulo^.Busy) OR MCJog.Busy OR MCHalt.Busy OR McReset.Busy;
+	 
 
-Busy := ((MCMoveAbsolute <> 0) AND_THEN MCMoveAbsolute^.Busy) OR MCHalt.Busy OR MCReset.Busy;]]></ST>
+// _Busy := ((MCMoveAbsolute <> 0) AND_THEN MCMoveAbsolute^.Busy) OR ((MCMoveRelative <> 0) AND_THEN MCMoveRelative^.Busy) OR ((MCMoveVelocity <> 0) AND_THEN MCMoveVelocity^.Busy) OR ((MCMoveModulo <> 0) AND_THEN MCMoveModulo^.Busy) OR MCJog.Busy OR MCHalt.Busy OR ((ipHomeMethod <> 0) AND_THEN ipHomeMethod.Busy) OR ((ipResetMethod <> 0) AND_THEN ipResetMethod.Busy) OR
+// 		 ((ipExternalSequence <> 0) AND_THEN ipExternalSequence.Busy) OR MCWriteParameter.Busy OR MCWriteBoolParameter.Busy;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Disable" Id="{3095fd83-673f-4ac6-bd20-c0fbfaf6e98f}" FolderPath="Command\">
@@ -93,7 +154,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[MCPower(Axis := axis, Enable := FALSE, Enable_Positive := FALSE, Enable_Negative := FALSE);
+        <ST><![CDATA[MCPower(Axis := _axis, Enable := FALSE, Enable_Positive := FALSE, Enable_Negative := FALSE);
 Disable := TRUE;
 AxisAlarm[E_AxisEvent.Disable].Send(0);]]></ST>
       </Implementation>
@@ -104,31 +165,42 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[MCPower(Axis := axis, Enable := TRUE, Enable_Positive := TRUE, Enable_Negative := TRUE);
+        <ST><![CDATA[MCPower(Axis := _axis, Enable := TRUE, Enable_Positive := TRUE, Enable_Negative := TRUE);
 Enable := TRUE;
 
 AxisAlarm[E_AxisEvent.Enable].Send(0);]]></ST>
       </Implementation>
     </Method>
+    <Property Name="Enabled" Id="{52e168f3-afa1-44d2-b52b-cfebfbfef6fb}">
+      <Declaration><![CDATA[PROPERTY Enabled : BOOL]]></Declaration>
+      <Get Name="Get" Id="{63419f24-d199-4d11-bd38-1d8b5c950bc3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Enabled := _axis.NcToPlc.stateDword.0;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="Halt" Id="{8abb493e-29a5-4b5a-9b43-18a51c936525}" FolderPath="Command\">
       <Declaration><![CDATA[METHOD Halt : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF Error AND Axis.Status.Error THEN
+        <ST><![CDATA[IF Error AND _Axis.Status.Error THEN
 	(* It's possible that a function block errored but
 	not the NC itself--in this case we can allow a stop command.
 	If the NC axis has a real fault then we want a successful reset first *)
 	RETURN;
 END_IF
 
-MCHalt(Axis			:= Axis,
+MCHalt(Axis			:= _Axis,
 	   Execute		:= TRUE,
 	   Deceleration := stAxisParameter.Deceleration,
 	   Jerk			:= stAxisParameter.Jerk);
-Halt := TRUE;
 
+Halt := TRUE;
 AxisAlarm[E_AxisEvent.Halt].Send(0);]]></ST>
       </Implementation>
     </Method>
@@ -139,8 +211,7 @@ AxisAlarm[E_AxisEvent.Halt].Send(0);]]></ST>
 AxisAlarm[E_AxisEvent.Enable].CreateEx(stEventEntry := TC_Events.AxisEvent.Enable, 0);
 AxisAlarm[E_AxisEvent.Halt].CreateEx(stEventEntry := TC_Events.AxisEvent.Halt, 0);
 AxisAlarm[E_AxisEvent.Reset].CreateEx(stEventEntry := TC_Events.AxisEvent.Reset, 0);
-AxisAlarm[E_AxisEvent.MoveAbsolute].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveAbsolute, 0);
-]]></ST>
+AxisAlarm[E_AxisEvent.MoveAbsolute].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveAbsolute, 0);]]></ST>
       </Implementation>
     </Method>
     <Property Name="InPosition" Id="{bb1fcd93-1c13-4877-81cd-be535d620a08}">
@@ -151,13 +222,36 @@ AxisAlarm[E_AxisEvent.MoveAbsolute].CreateEx(stEventEntry := TC_Events.AxisEvent
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[InPosition := Axis.Status.InTargetPosition;
-]]></ST>
+          <ST><![CDATA[InPosition := Axis.NcToPLC.stateDword.4;]]></ST>
         </Implementation>
       </Get>
     </Property>
+    <Method Name="Jog" Id="{c7b60024-eb89-0d4c-1d95-e278a1142452}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD Jog : BOOL
+VAR_INPUT
+	JogFW	 : BOOL;
+	JogBW	 : BOOL;
+	JogMode	 : E_JogMode;
+	Position : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Error THEN
+	RETURN;
+END_IF
+
+MCJog(Axis		   := _Axis,
+	  JogForward   := JogFW,
+	  JogBackwards := JogBW,
+	  Mode		   := JogMode,
+	  Position	   := Position,
+	  Velocity	   := stAxisParameter.Velocity,
+	  Acceleration := stAxisParameter.Acceleration,
+	  Deceleration := stAxisParameter.Deceleration,
+	  Jerk		   := stAxisParameter.Jerk);]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="MoveAbsolute" Id="{e0b7fc15-0058-4245-8ed3-e7a88789df47}" FolderPath="Command\">
-      <Declaration><![CDATA[METHOD MoveAbsolute
+      <Declaration><![CDATA[METHOD MoveAbsolute : BOOL
 VAR_INPUT
 	Position : LREAL;
 	AbortPrevious : BOOL;
@@ -173,7 +267,7 @@ ELSE
 END_IF
 
 MCMoveAbsolute := RingBuffer_MCMoveAbsolute.GetNewFB();
-MCMoveAbsolute^(Axis		 := Axis,
+MCMoveAbsolute^(Axis		 := _Axis,
 				Execute		 := TRUE,
 				Position	 := Position,
 				Velocity	 := stAxisParameter.Velocity,
@@ -181,7 +275,102 @@ MCMoveAbsolute^(Axis		 := Axis,
 				Deceleration := stAxisParameter.Deceleration,
 				Jerk		 := stAxisParameter.Jerk);
 				
+MoveAbsolute := TRUE;
 AxisAlarm[E_AxisEvent.MoveAbsolute].Send(0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MoveModulo" Id="{dc2807b5-b7e0-4b5c-a856-11de0e86c266}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD MoveModulo : BOOL
+VAR_INPUT
+	Position	  : LREAL;
+	Direction	  : MC_Direction;
+	AbortPrevious : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Error THEN
+	RETURN;
+ELSE
+	IF (Busy AND NOT AbortPrevious) THEN
+		RETURN;
+	END_IF
+END_IF
+
+MCMoveModulo := RingBuffer_MCMoveModulo.GetNewFB();
+MCMoveModulo^(Axis		   := _Axis,
+			  Execute	   := TRUE,
+			  Position	   := Position,
+			  Velocity	   := stAxisParameter.Velocity,
+			  Acceleration := stAxisParameter.Acceleration,
+			  Deceleration := stAxisParameter.Deceleration,
+			  Jerk		   := stAxisParameter.Jerk,
+			  Direction	   := Direction);
+
+MoveModulo := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MoveRelative" Id="{c5e96026-3021-09da-1c40-74a3f3a106d0}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD MoveRelative : BOOL
+VAR_INPUT
+	Distance	  : LREAL;
+	AbortPrevious : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Error THEN
+	RETURN;
+ELSE
+	IF (Busy AND NOT AbortPrevious) THEN
+		RETURN;
+	END_IF
+END_IF
+
+MCMoveRelative := RingBuffer_MCMoveRelative.GetNewFB();
+MCMoveRelative^(Axis		 := _Axis,
+				Execute		 := TRUE,
+				Distance	 := Distance,
+				Velocity	 := stAxisParameter.Velocity,
+				Acceleration := stAxisParameter.Acceleration,
+				Deceleration := stAxisParameter.Deceleration,
+				Jerk		 := stAxisParameter.Jerk);
+
+MoveRelative := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MoveVelocity" Id="{b1a41576-f891-0925-2902-d5863905e9c1}" FolderPath="Command\">
+      <Declaration><![CDATA[METHOD MoveVelocity : BOOL
+VAR_INPUT
+	Velocity	  : LREAL;
+	AbortPrevious : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Error THEN
+	RETURN;
+ELSE
+	IF (Busy AND NOT AbortPrevious) THEN
+		RETURN;
+	END_IF
+END_IF
+
+// IF ABS(Velocity) > _AxisParameters.fVeloMaximum THEN
+// 	Trace('Velocity setpoint exceeds axis limit');
+// END_IF
+
+IF Velocity < 0 THEN
+	MCMoveVelocity			  := RingBuffer_MCMoveVelocity.GetNewFB();
+	MCMoveVelocity^.Direction := MC_Negative_Direction;
+ELSE
+	MCMoveVelocity			  := RingBuffer_MCMoveVelocity.GetNewFB();
+	MCMoveVelocity^.Direction := MC_Positive_Direction;
+END_IF
+
+//_Velocity := ABS(Velocity); 
+MCMoveVelocity^(Axis		 := _Axis,
+				Execute		 := TRUE,
+				Velocity	 := stAxisParameter.Velocity,
+				Acceleration := stAxisParameter.Acceleration,
+				Deceleration := stAxisParameter.Deceleration,
+				Jerk		 := stAxisParameter.Jerk);
+
+MoveVelocity := TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Reset" Id="{86d17185-5653-45be-9d73-69b0cf831727}" FolderPath="Command\">
@@ -190,24 +379,78 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[MCReset(Axis := Axis, Execute := TRUE);
+        <ST><![CDATA[MCReset(Axis := _Axis, Execute := TRUE);
 Busy	 := TRUE;
 Error := FALSE;
 ErrorID := 0;
 Reset := TRUE;
 
-IF MCMoveAbsolute <> 0 THEN
+ResetFBs();
+
+AxisAlarm[E_AxisEvent.Reset].Send(0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetFBs" Id="{0ea2ea44-08c1-472c-9be6-e8625fc9c589}">
+      <Declaration><![CDATA[METHOD PRIVATE ResetFBs
+VAR_INPUT
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF MCMoveAbsolute <> 0 THEN
 	IF MCMoveAbsolute^.Error THEN
-		MCMoveAbsolute^(Axis := Axis, Execute := FALSE);
+		MCMoveAbsolute^(Axis := _Axis, Execute := FALSE);
 	END_IF
 END_IF
 
-
-IF MCHalt.Error THEN
-	MCHalt(Axis := Axis, Execute := FALSE);
+IF MCMoveRelative <> 0 THEN
+	IF MCMoveRelative^.Error THEN
+		MCMoveRelative^(Axis := _Axis, Execute := FALSE);
+	END_IF
 END_IF
 
-AxisAlarm[E_AxisEvent.Reset].Send(0);]]></ST>
+IF MCMoveVelocity <> 0 THEN
+	IF MCMoveVelocity^.Error THEN
+		MCMoveVelocity^(Axis := _Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+IF MCMoveModulo <> 0 THEN
+	IF MCMoveModulo^.Error THEN
+		MCMoveModulo^(Axis := _Axis, Execute := FALSE);
+	END_IF
+END_IF
+
+IF MCJog.Error THEN
+	MCJog(Axis := _Axis, JogForward := FALSE, JogBackwards := FALSE);
+END_IF
+
+IF MCHalt.Error THEN
+	MCHalt(Axis := _Axis, Execute := FALSE);
+END_IF
+
+//    IF MCMoveSuperimposed.Error THEN
+
+//        MCMoveSuperimposed(Axis := _Axis, Execute := FALSE);
+
+//    END_IF
+
+//    IF MCAbortSuperposition.Error THEN
+
+//        MCAbortSuperposition(Axis := _Axis, Execute := FALSE);
+
+// //    END_IF  
+
+(* Temperaly delete It could be used *)
+// IF MCReadParameterSet.Error THEN
+// 	MCReadParameterSet(Axis := _Axis, Parameter := _AxisParameters, Execute := FALSE);
+// END_IF
+// 
+// IF MCWriteBoolParameter.Error THEN
+// 	MCWriteBoolParameter(Axis := _Axis, Execute := FALSE);
+// END_IF
+// 
+// IF MCWriteParameter.Error THEN
+// 	MCWriteParameter(Axis := _Axis, Execute := FALSE);
+// END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="UpdateAxisStatus" Id="{e8a3dd73-9d2a-41b5-b104-842058e2119c}" FolderPath="Command\">

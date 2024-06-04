@@ -31,13 +31,19 @@
     <Compile Include="DUTs\ST_AxisParameter.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\U_WORD.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Motion Function Block\FB_Axis.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Motion Function Block\FB_RingBuffer_MCMoveAbsolute.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Motion Function Block\FB_RingBuffer_MCMoveModulo.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Motion Function Block\FB_RingBuffer_MCMoveRelative.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Motion Function Block\FB_RingBuffer_MCMoveVelocity.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PlcTask.TcTTO">
@@ -46,7 +52,19 @@
     <Compile Include="POUs\MAIN.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\Test.TcPOU">
+    <Compile Include="UnitTest\FB_MoveAbsolute_Test.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UnitTest\FB_Jog_Test.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UnitTest\FB_MoveModulo_Test.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UnitTest\FB_MoveRelative_Test.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UnitTest\PRG_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -54,6 +72,7 @@
     <Folder Include="DUTs" />
     <Folder Include="GVLs" />
     <Folder Include="Motion Function Block" />
+    <Folder Include="UnitTest" />
     <Folder Include="VISUs" />
     <Folder Include="POUs" />
   </ItemGroup>
@@ -79,6 +98,10 @@
       <Namespace>Tc3_Module</Namespace>
       <SystemLibrary>true</SystemLibrary>
     </PlaceholderReference>
+    <PlaceholderReference Include="TcUnit">
+      <DefaultResolution>TcUnit, * (www.tcunit.org)</DefaultResolution>
+      <Namespace>TcUnit</Namespace>
+    </PlaceholderReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Untitled1.tmc">
@@ -88,13 +111,19 @@
   <ProjectExtensions>
     <PlcProjectOptions>
       <XmlArchive>
-        <Data>
-          <o xml:space="preserve" t="OptionKey">
+  <Data>
+    <o xml:space="preserve" t="OptionKey">
       <v n="Name">"&lt;ProjectRoot&gt;"</v>
       <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
         <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
         <o>
           <v n="Name">"{192FAD59-8248-4824-A8DE-9177C94C195A}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{246001F4-279D-43AC-B241-948EB31120E1}</v>
+        <o>
+          <v n="Name">"{246001F4-279D-43AC-B241-948EB31120E1}"</v>
           <d n="SubKeys" t="Hashtable" />
           <d n="Values" t="Hashtable" />
         </o>
@@ -150,14 +179,14 @@
       </d>
       <d n="Values" t="Hashtable" />
     </o>
-        </Data>
-        <TypeList>
-          <Type n="Boolean">System.Boolean</Type>
-          <Type n="Hashtable">System.Collections.Hashtable</Type>
-          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
-          <Type n="String">System.String</Type>
-        </TypeList>
-      </XmlArchive>
+  </Data>
+  <TypeList>
+    <Type n="Boolean">System.Boolean</Type>
+    <Type n="Hashtable">System.Collections.Hashtable</Type>
+    <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+    <Type n="String">System.String</Type>
+  </TypeList>
+</XmlArchive>
     </PlcProjectOptions>
   </ProjectExtensions>
 </Project>

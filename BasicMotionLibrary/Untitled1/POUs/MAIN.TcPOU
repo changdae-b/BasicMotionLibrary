@@ -4,7 +4,6 @@
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
 	axis1 : FB_Axis;
-	axis : ARRAY[1..100] OF FB_AXIS;
 	testStep: INT := 3;
 	
 	Pos : LREAL;
@@ -15,6 +14,7 @@ VAR
 	Test1_AxisParameter : ST_AxisParameter := (Acceleration := 100, Deceleration := 100, Velocity := 50, Jerk :=500);
 	Test2_AxisParameter : ST_AxisParameter := (Acceleration := 1050, Deceleration := 500, Velocity := 150, Jerk :=300);
 	Test3_AxisParameter : ST_AxisParameter := (Acceleration := 105, Deceleration := 50, Velocity := 15, Jerk :=30);
+	rrTest : LREAL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[axis1.UpdateAxisStatus(); //모터 지령 받기전에 상태 업데이트 필요 (코드 제일 상단에서 콜 해야함 ) 
@@ -41,6 +41,17 @@ CASE testStep OF
 	50:
 		axis1.MoveAbsolute(2000, FALSE);// 2000의 절대위치로 이동, 다른 모션 명령 실행중일땐 명령 무시
 		testStep := 1;
+	55:
+		axis1.Jog(TRUE, FALSE, E_JOGMODE.MC_JOGMODE_STANDARD_SLOW, 0);
+	56:
+		axis1.MoveModulo(rrTest, MC_Direction.MC_Negative_Direction, FALSE);
+		teststep:=1;
+	57:
+		axis1.MoveModulo(rrTest, MC_Direction.MC_Positive_Direction, FALSE);
+		teststep:=1;
+	58:
+		axis1.MoveModulo(rrTest, MC_Direction.MC_Shortest_Way, FALSE);
+		teststep:=1;
 	60:
 		axis1.Halt(); // 모션 명령 정지
 		testStep := 1;
@@ -85,8 +96,7 @@ END_CASE
 
 axis1.CyclicLogic(); //펑션 콜 하는 기능 주기적으로 계속 실행되야함
 
-(*--------------------------------*)
-Test();]]></ST>
+(*--------------------------------*)]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>
