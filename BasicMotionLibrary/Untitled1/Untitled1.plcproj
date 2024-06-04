@@ -58,6 +58,9 @@
     <Compile Include="UnitTest\FB_Jog_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UnitTest\FB_MoveVelocity_Test.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UnitTest\FB_MoveModulo_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>

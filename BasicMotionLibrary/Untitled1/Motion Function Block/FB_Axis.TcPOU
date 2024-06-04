@@ -362,10 +362,10 @@ ELSE
 	MCMoveVelocity^.Direction := MC_Positive_Direction;
 END_IF
 
-//_Velocity := ABS(Velocity); 
+ 
 MCMoveVelocity^(Axis		 := _Axis,
 				Execute		 := TRUE,
-				Velocity	 := stAxisParameter.Velocity,
+				Velocity	 := ABS(Velocity),
 				Acceleration := stAxisParameter.Acceleration,
 				Deceleration := stAxisParameter.Deceleration,
 				Jerk		 := stAxisParameter.Jerk);

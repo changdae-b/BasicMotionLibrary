@@ -22,7 +22,7 @@ VAR_INST
 	step: INT;
 	
 	fbTon : TON := (PT:= T#10s);
-	EXPECTED_RESULT : LREAL := 100;
+	EXPECTED_RESULT : INT := 20;
 END_VAR
  ]]></Declaration>
       <Implementation>
@@ -42,7 +42,7 @@ END_VAR
 			END_IF
 			
 		11:
-			IF NOT fbTestAxis.Busy THEN
+			IF NOT fbTestAxis.Busy AND fbTestAxis.InPosition THEN
 				step := 20;
 			END_IF
 		
@@ -55,7 +55,7 @@ END_VAR
 	
 	fbTon(IN := TRUE);
 	IF fbTon.Q OR step = 20 THEN
-		AssertEquals(Expected := EXPECTED_RESULT, Actual := fbTestAxis.Axis.NcToPlc.ActPos , Message := 'MoveModulo100 didnt work');
+		AssertEquals(Expected := EXPECTED_RESULT, Actual := step , Message := 'MoveModulo100 didnt work');
 		TEST_FINISHED();
 	END_IF
 END_IF
@@ -71,7 +71,7 @@ VAR_INST
 	step: INT;
 	
 	fbTon : TON := (PT:= T#10s);
-	EXPECTED_RESULT : LREAL := -800;
+	EXPECTED_RESULT : int := 20;
 END_VAR
  ]]></Declaration>
       <Implementation>
@@ -91,7 +91,7 @@ END_VAR
 			END_IF
 			
 		11:
-			IF NOT fbTestAxis.Busy THEN
+			IF NOT fbTestAxis.Busy AND fbTestAxis.InPosition THEN
 				step := 20;
 			END_IF
 		20: //Done
@@ -102,7 +102,7 @@ END_VAR
 	
 	fbTon(IN := TRUE);
 	IF fbTon.Q OR step = 20 THEN
-		AssertEquals(Expected := EXPECTED_RESULT, Actual := fbTestAxis.Axis.NcToPlc.ActPos, Message := 'MoveAbsolute1000_negDir');
+		AssertEquals(Expected := EXPECTED_RESULT, Actual := step, Message := 'MoveAbsolute1000_negDir');
 		TEST_FINISHED();
 	END_IF
 END_IF
@@ -118,11 +118,11 @@ VAR_INST
 	step: INT;
 	
 	fbTon : TON := (PT:= T#10s);
-	EXPECTED_RESULT : LREAL := -930;
+	EXPECTED_RESULT : INT := 20;
 END_VAR
  ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF TEST_ORDERED('MoveModulo300') THEN
+        <ST><![CDATA[IF TEST_ORDERED('MoveModulo150') THEN
 		
 	
 	fbTestAxis.CyclicLogic();
@@ -139,7 +139,7 @@ END_VAR
 			END_IF
 			
 		11:
-			IF NOT fbTestAxis.Busy THEN
+			IF NOT fbTestAxis.Busy AND fbTestAxis.InPosition THEN
 				step := 20;
 			END_IF
 		20: //Done
@@ -150,7 +150,7 @@ END_VAR
 	
 	fbTon(IN := TRUE);
 	IF fbTon.Q OR step = 20 THEN
-		AssertEquals(Expected := EXPECTED_RESULT, Actual := fbTestAxis.Axis.NcToPlc.ActPos, Message := 'MoveModulo150_shortest way didnt work');
+		AssertEquals(Expected := EXPECTED_RESULT, Actual := step, Message := 'MoveModulo150_shortest way didnt work');
 		TEST_FINISHED();
 	END_IF
 END_IF

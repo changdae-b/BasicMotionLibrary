@@ -37,7 +37,7 @@ CASE step OF
 			step := 11;
 		END_IF
 	11:
-		IF NOT fbTestAxis.Busy THEN
+		IF NOT fbTestAxis.Busy AND fbTestAxis.InPosition THEN
 			step := 20;
 		END_IF
 	20:
@@ -75,7 +75,7 @@ CASE step OF
 			step := 11;
 		END_IF
 	11:
-		IF NOT fbTestAxis.Busy THEN
+		IF NOT fbTestAxis.Busy AND fbTestAxis.InPosition THEN
 			step := 20;
 		END_IF
 	20:
@@ -113,7 +113,7 @@ CASE step OF
 			step := 11;
 		END_IF
 	11:
-		IF NOT fbTestAxis.Busy THEN
+		IF NOT fbTestAxis.Busy AND fbTestAxis.InPosition THEN
 			step := 20;
 		END_IF
 	20:

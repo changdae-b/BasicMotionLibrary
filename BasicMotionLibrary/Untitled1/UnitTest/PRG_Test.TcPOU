@@ -5,6 +5,7 @@
 VAR
 	fbMoveAbsoluteTest : FB_MoveAbsolute_Test;
 	fbMoveModuloTest : FB_MoveModulo_Test;
+	fbMoveVelocity : FB_MoveVelocity_Test;
 	fbMoveRelativeTest : FB_MoveRelative_Test;
 	fbJogTest : FB_Jog_Test;
 END_VAR
