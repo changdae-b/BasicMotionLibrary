@@ -52,19 +52,19 @@
     <Compile Include="POUs\MAIN.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UnitTest\FB_MoveAbsolute_Test.TcPOU">
+    <Compile Include="UnitTest\BasicMotionFunction\FB_Jog_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UnitTest\FB_Jog_Test.TcPOU">
+    <Compile Include="UnitTest\BasicMotionFunction\FB_MoveAbsolute_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UnitTest\FB_MoveVelocity_Test.TcPOU">
+    <Compile Include="UnitTest\BasicMotionFunction\FB_MoveModulo_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UnitTest\FB_MoveModulo_Test.TcPOU">
+    <Compile Include="UnitTest\BasicMotionFunction\FB_MoveRelative_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UnitTest\FB_MoveRelative_Test.TcPOU">
+    <Compile Include="UnitTest\BasicMotionFunction\FB_MoveVelocity_Test.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UnitTest\PRG_Test.TcPOU">
@@ -76,6 +76,7 @@
     <Folder Include="GVLs" />
     <Folder Include="Motion Function Block" />
     <Folder Include="UnitTest" />
+    <Folder Include="UnitTest\BasicMotionFunction" />
     <Folder Include="VISUs" />
     <Folder Include="POUs" />
   </ItemGroup>
@@ -110,6 +111,38 @@
     <None Include="Untitled1.tmc">
       <SubType>Content</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderResolution Include="SysDir">
+      <Resolution>SysDir, 3.5.17.0 (System)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="SysFile">
+      <Resolution>SysFile, 3.5.17.0 (System)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Math">
+      <Resolution>Tc2_Math, 3.4.4.0 (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_MC2">
+      <Resolution>Tc2_MC2, 3.3.62.0 (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Standard">
+      <Resolution>Tc2_Standard, 3.4.5.0 (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_System">
+      <Resolution>Tc2_System, 3.6.4.0 (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Utilities">
+      <Resolution>Tc2_Utilities, 3.7.4.0 (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc3_EventLogger">
+      <Resolution>Tc3_EventLogger, 3.3.8.0 (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc3_Module">
+      <Resolution>Tc3_Module, 3.4.5.0 (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="TcUnit">
+      <Resolution>TcUnit, 1.3.0.0 (www.tcunit.org)</Resolution>
+    </PlaceholderResolution>
   </ItemGroup>
   <ProjectExtensions>
     <PlcProjectOptions>

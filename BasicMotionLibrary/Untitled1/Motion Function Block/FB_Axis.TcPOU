@@ -211,7 +211,12 @@ AxisAlarm[E_AxisEvent.Halt].Send(0);]]></ST>
 AxisAlarm[E_AxisEvent.Enable].CreateEx(stEventEntry := TC_Events.AxisEvent.Enable, 0);
 AxisAlarm[E_AxisEvent.Halt].CreateEx(stEventEntry := TC_Events.AxisEvent.Halt, 0);
 AxisAlarm[E_AxisEvent.Reset].CreateEx(stEventEntry := TC_Events.AxisEvent.Reset, 0);
-AxisAlarm[E_AxisEvent.MoveAbsolute].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveAbsolute, 0);]]></ST>
+AxisAlarm[E_AxisEvent.MoveAbsolute].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveAbsolute, 0);
+AxisAlarm[E_AxisEvent.MoveModulo].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveModulo, 0);
+AxisAlarm[E_AxisEvent.MoveRelative].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveRelative, 0);
+AxisAlarm[E_AxisEvent.MoveVelocity].CreateEx(stEventEntry := TC_Events.AxisEvent.MoveVelocity, 0);
+AxisAlarm[E_AxisEvent.Jog].CreateEx(stEventEntry := TC_Events.AxisEvent.Jog, 0);
+]]></ST>
       </Implementation>
     </Method>
     <Property Name="InPosition" Id="{bb1fcd93-1c13-4877-81cd-be535d620a08}">
@@ -247,7 +252,8 @@ MCJog(Axis		   := _Axis,
 	  Velocity	   := stAxisParameter.Velocity,
 	  Acceleration := stAxisParameter.Acceleration,
 	  Deceleration := stAxisParameter.Deceleration,
-	  Jerk		   := stAxisParameter.Jerk);]]></ST>
+	  Jerk		   := stAxisParameter.Jerk);
+Jog := TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="MoveAbsolute" Id="{e0b7fc15-0058-4245-8ed3-e7a88789df47}" FolderPath="Command\">
@@ -305,7 +311,8 @@ MCMoveModulo^(Axis		   := _Axis,
 			  Jerk		   := stAxisParameter.Jerk,
 			  Direction	   := Direction);
 
-MoveModulo := TRUE;]]></ST>
+MoveModulo := TRUE;
+AxisAlarm[E_AxisEvent.MoveModulo].Send(0);]]></ST>
       </Implementation>
     </Method>
     <Method Name="MoveRelative" Id="{c5e96026-3021-09da-1c40-74a3f3a106d0}" FolderPath="Command\">
@@ -332,7 +339,8 @@ MCMoveRelative^(Axis		 := _Axis,
 				Deceleration := stAxisParameter.Deceleration,
 				Jerk		 := stAxisParameter.Jerk);
 
-MoveRelative := TRUE;]]></ST>
+MoveRelative := TRUE;
+AxisAlarm[E_AxisEvent.MoveRelative].Send(0);]]></ST>
       </Implementation>
     </Method>
     <Method Name="MoveVelocity" Id="{b1a41576-f891-0925-2902-d5863905e9c1}" FolderPath="Command\">
@@ -370,7 +378,8 @@ MCMoveVelocity^(Axis		 := _Axis,
 				Deceleration := stAxisParameter.Deceleration,
 				Jerk		 := stAxisParameter.Jerk);
 
-MoveVelocity := TRUE;]]></ST>
+MoveVelocity := TRUE;
+AxisAlarm[E_AxisEvent.MoveVelocity].Send(0);]]></ST>
       </Implementation>
     </Method>
     <Method Name="Reset" Id="{86d17185-5653-45be-9d73-69b0cf831727}" FolderPath="Command\">
@@ -387,7 +396,9 @@ Reset := TRUE;
 
 ResetFBs();
 
-AxisAlarm[E_AxisEvent.Reset].Send(0);]]></ST>
+AxisAlarm[E_AxisEvent.Reset].Send(0);
+Reset := TRUE;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="ResetFBs" Id="{0ea2ea44-08c1-472c-9be6-e8625fc9c589}">

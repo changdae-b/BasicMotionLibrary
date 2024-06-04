@@ -87,10 +87,11 @@ END_VAR
 		11:
 			IF fbTestAxis.Axis.NcToPlc.ActVelo <= -999 THEN
 				step := 20;
+				fbTestAxis.Halt();
 			END_IF
 		
 		20: 
-			fbTestAxis.Halt();
+			
 			//Done
 		
 	
@@ -103,11 +104,7 @@ END_VAR
 		AssertEquals(Expected := EXPECTED_RESULT, Actual := step, Message := 'MoveVelocity100 didnt work');
 		TEST_FINISHED();
 	END_IF
-END_IF
-
-		
-	
-]]></ST>
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="MoveVelocity100" Id="{d03cd6d9-98ca-4ba1-8898-05471d08ce4c}">
